@@ -35,10 +35,12 @@ const canvas = document.createElement("canvas");
 canvas.width = video.videoWidth;
 canvas.height = video.videoHeight;
 
-const context = canvas.getContext("2d");
-if (!context) {
+const maybeContext = canvas.getContext("2d");
+if (maybeContext === null) {
 throw new Error("Canvas context not available.");
 }
+
+const context: CanvasRenderingContext2D = maybeContext;
 
 const stream = canvas.captureStream();
 const recorder = new MediaRecorder(stream, {
@@ -47,9 +49,9 @@ mimeType: "video/webm",
 
 const chunks: BlobPart[] = [];
 
-recorder.ondataavailable = (e) => {
-if (e.data.size > 0) {
-chunks.push(e.data);
+recorder.ondataavailable = (event) => {
+if (event.data.size > 0) {
+chunks.push(event.data);
 }
 };
 
@@ -60,7 +62,7 @@ recorder.onstop = () => resolve();
 const start = startMs / 1000;
 const end = endMs / 1000;
 
-const prevTime = video.currentTime;
+const previousTime = video.currentTime;
 const wasPaused = video.paused;
 
 await waitForSeek(video, start);
@@ -93,7 +95,7 @@ recorder.stop();
 }
 
 await stopped;
-await waitForSeek(video, prevTime);
+await waitForSeek(video, previousTime);
 
 if (!wasPaused) {
 video.play().catch(() => undefined);
@@ -107,5 +109,7 @@ a.href = url;
 a.download = filename;
 a.click();
 
-setTimeout(() => URL.revokeObjectURL(url), 1000);
+setTimeout(() => {
+URL.revokeObjectURL(url);
+}, 1000);
 }
