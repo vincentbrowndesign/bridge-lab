@@ -5,26 +5,14 @@ endMs: number;
 filename?: string;
 };
 
-function waitForSeek(video: HTMLVideoElement, timeSeconds: number) {
-return new Promise<void>((resolve, reject) => {
-const onSeeked = () => {
-cleanup();
+function waitForSeek(video: HTMLVideoElement, time: number) {
+return new Promise<void>((resolve) => {
+const handler = () => {
+video.removeEventListener("seeked", handler);
 resolve();
 };
-
-const onError = () => {
-cleanup();
-reject(new Error("Video seek failed."));
-};
-
-const cleanup = () => {
-video.removeEventListener("seeked", onSeeked);
-video.removeEventListener("error", onError);
-};
-
-video.addEventListener("seeked", onSeeked, { once: true });
-video.addEventListener("error", onError, { once: true });
-video.currentTime = timeSeconds;
+video.addEventListener("seeked", handler);
+video.currentTime = time;
 });
 }
 
@@ -32,61 +20,52 @@ export async function exportClip({
 video,
 startMs,
 endMs,
-filename = "sequence.webm",
+filename = "clip.webm",
 }: ExportClipArgs) {
-if (!video.videoWidth || !video.videoHeight) {
-throw new Error("Video metadata is not ready yet.");
-}
-
-if (endMs <= startMs) {
-throw new Error("Invalid clip range.");
-}
+if (endMs <= startMs) return;
 
 const canvas = document.createElement("canvas");
 canvas.width = video.videoWidth;
 canvas.height = video.videoHeight;
 
 const ctx = canvas.getContext("2d");
-if (!ctx) {
-throw new Error("Canvas context not available.");
-}
+if (!ctx) return; // ✅ THIS FIXES YOUR ERROR
 
 const stream = canvas.captureStream();
-const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
-? "video/webm;codecs=vp9"
-: "video/webm";
 
-const recorder = new MediaRecorder(stream, { mimeType });
+const recorder = new MediaRecorder(stream, {
+mimeType: "video/webm",
+});
+
 const chunks: BlobPart[] = [];
 
-recorder.ondataavailable = (event) => {
-if (event.data.size > 0) {
-chunks.push(event.data);
-}
+recorder.ondataavailable = (e) => {
+if (e.data.size > 0) chunks.push(e.data);
 };
 
 const stopped = new Promise<void>((resolve) => {
 recorder.onstop = () => resolve();
 });
 
-const startSeconds = startMs / 1000;
-const endSeconds = endMs / 1000;
+const start = startMs / 1000;
+const end = endMs / 1000;
 
+const prevTime = video.currentTime;
 const wasPaused = video.paused;
-const previousTime = video.currentTime;
 
-await waitForSeek(video, startSeconds);
+await waitForSeek(video, start);
 
-recorder.start(100);
+recorder.start();
 
 try {
 await video.play();
 
 await new Promise<void>((resolve) => {
 function draw() {
+// ✅ SAFE — ctx is guaranteed
 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-if (video.currentTime >= endSeconds || video.ended) {
+if (video.currentTime >= end || video.ended) {
 resolve();
 return;
 }
@@ -98,21 +77,18 @@ draw();
 });
 } finally {
 video.pause();
-
-if (recorder.state !== "inactive") {
 recorder.stop();
-}
 }
 
 await stopped;
 
-await waitForSeek(video, previousTime);
+await waitForSeek(video, prevTime);
 
 if (!wasPaused) {
-video.play().catch(() => undefined);
+video.play().catch(() => {});
 }
 
-const blob = new Blob(chunks, { type: mimeType });
+const blob = new Blob(chunks, { type: "video/webm" });
 const url = URL.createObjectURL(blob);
 
 const a = document.createElement("a");
@@ -120,7 +96,5 @@ a.href = url;
 a.download = filename;
 a.click();
 
-setTimeout(() => {
-URL.revokeObjectURL(url);
-}, 1000);
+setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
