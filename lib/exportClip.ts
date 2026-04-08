@@ -48,7 +48,7 @@ canvas.height = video.videoHeight;
 
 const ctx = canvas.getContext("2d");
 if (!ctx) {
-throw new Error("Canvas context unavailable.");
+throw new Error("Canvas context not available.");
 }
 
 const stream = canvas.captureStream();
@@ -98,6 +98,7 @@ draw();
 });
 } finally {
 video.pause();
+
 if (recorder.state !== "inactive") {
 recorder.stop();
 }
@@ -106,6 +107,7 @@ recorder.stop();
 await stopped;
 
 await waitForSeek(video, previousTime);
+
 if (!wasPaused) {
 video.play().catch(() => undefined);
 }
@@ -118,5 +120,7 @@ a.href = url;
 a.download = filename;
 a.click();
 
-setTimeout(() => URL.revokeObjectURL(url), 1000);
+setTimeout(() => {
+URL.revokeObjectURL(url);
+}, 1000);
 }
