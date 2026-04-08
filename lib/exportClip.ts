@@ -11,6 +11,7 @@ const handler = () => {
 video.removeEventListener("seeked", handler);
 resolve();
 };
+
 video.addEventListener("seeked", handler);
 video.currentTime = time;
 });
@@ -22,17 +23,24 @@ startMs,
 endMs,
 filename = "clip.webm",
 }: ExportClipArgs) {
-if (endMs <= startMs) return;
+if (endMs <= startMs) {
+throw new Error("Invalid clip range.");
+}
+
+if (!video.videoWidth || !video.videoHeight) {
+throw new Error("Video metadata is not ready.");
+}
 
 const canvas = document.createElement("canvas");
 canvas.width = video.videoWidth;
 canvas.height = video.videoHeight;
 
-const ctx = canvas.getContext("2d");
-if (!ctx) return; // ✅ THIS FIXES YOUR ERROR
+const context = canvas.getContext("2d");
+if (!context) {
+throw new Error("Canvas context not available.");
+}
 
 const stream = canvas.captureStream();
-
 const recorder = new MediaRecorder(stream, {
 mimeType: "video/webm",
 });
@@ -40,7 +48,9 @@ mimeType: "video/webm",
 const chunks: BlobPart[] = [];
 
 recorder.ondataavailable = (e) => {
-if (e.data.size > 0) chunks.push(e.data);
+if (e.data.size > 0) {
+chunks.push(e.data);
+}
 };
 
 const stopped = new Promise<void>((resolve) => {
@@ -62,8 +72,7 @@ await video.play();
 
 await new Promise<void>((resolve) => {
 function draw() {
-// ✅ SAFE — ctx is guaranteed
-ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
 if (video.currentTime >= end || video.ended) {
 resolve();
@@ -77,15 +86,17 @@ draw();
 });
 } finally {
 video.pause();
+
+if (recorder.state !== "inactive") {
 recorder.stop();
+}
 }
 
 await stopped;
-
 await waitForSeek(video, prevTime);
 
 if (!wasPaused) {
-video.play().catch(() => {});
+video.play().catch(() => undefined);
 }
 
 const blob = new Blob(chunks, { type: "video/webm" });

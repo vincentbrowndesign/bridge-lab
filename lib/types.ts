@@ -41,3 +41,27 @@ objectUrl: string;
 durationMs: number;
 createdAt: string;
 }
+
+export interface SessionArchive {
+session: {
+id: string;
+name: string;
+durationMs: number;
+createdAt: string;
+};
+summary: {
+catch: number;
+drive: number;
+pass: number;
+shot: number;
+make: number;
+miss: number;
+turnover: number;
+stop: number;
+shotAttempts: number;
+fg: number;
+};
+insights: string[];
+markers: Marker[];
+sequences: Sequence[];
+}
