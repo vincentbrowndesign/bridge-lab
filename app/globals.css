@@ -1,26 +1,513 @@
-@import "tailwindcss";
-
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+--bg: #0b0d12;
+--panel: #121722;
+--panel-2: #171d2b;
+--border: #283043;
+--text: #f3f6fb;
+--muted: #98a2b3;
+--accent: #b7ff3c;
+--danger: #ff6b6b;
+--shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+margin: 0;
+padding: 0;
+background: var(--bg);
+color: var(--text);
+font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+video {
+font: inherit;
+}
+
+button {
+cursor: pointer;
+border: 0;
+}
+
+.pageShell {
+max-width: 900px;
+margin: 0 auto;
+padding: 20px 14px 40px;
+}
+
+.mainStack {
+display: grid;
+gap: 18px;
+}
+
+.hero {
+display: grid;
+gap: 18px;
+margin-bottom: 20px;
+}
+
+.eyebrow {
+font-size: 12px;
+text-transform: uppercase;
+letter-spacing: 0.18em;
+color: var(--accent);
+margin-bottom: 8px;
+}
+
+h1,
+h2,
+h3,
+p {
+margin: 0;
+}
+
+h1 {
+font-size: 42px;
+line-height: 0.95;
+margin-bottom: 10px;
+}
+
+h2 {
+font-size: 24px;
+margin-bottom: 8px;
+}
+
+h3 {
+font-size: 18px;
+}
+
+.heroText {
+color: var(--muted);
+max-width: 720px;
+line-height: 1.5;
+}
+
+.heroActions {
+display: grid;
+gap: 10px;
+}
+
+.uploadBtn,
+.primaryBtn,
+.ghostBtn,
+.dangerBtn,
+.markerBtn,
+.timePill,
+.noteButton {
+border-radius: 14px;
+padding: 12px 16px;
+transition: 0.2s ease;
+}
+
+.uploadBtn,
+.primaryBtn {
+background: var(--accent);
+color: #0b0d12;
+font-weight: 700;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+text-decoration: none;
+}
+
+.ghostBtn {
+background: var(--panel-2);
+color: var(--text);
+border: 1px solid var(--border);
+}
+
+.dangerBtn {
+background: rgba(255, 107, 107, 0.12);
+color: #ffd2d2;
+border: 1px solid rgba(255, 107, 107, 0.25);
+}
+
+.timePill {
+background: #0e1320;
+color: var(--accent);
+border: 1px solid var(--border);
+min-width: 84px;
+}
+
+.noteButton {
+background: transparent;
+color: var(--muted);
+border: 0;
+padding: 0;
+text-align: left;
+border-radius: 0;
+font-size: 15px;
+}
+
+.markerBtn {
+background: var(--panel-2);
+color: var(--text);
+border: 1px solid var(--border);
+font-weight: 700;
+min-height: 78px;
+width: 100%;
+display: grid;
+place-items: center;
+text-align: center;
+font-size: 20px;
+}
+
+.uploadBtn:hover,
+.primaryBtn:hover,
+.ghostBtn:hover,
+.dangerBtn:hover,
+.markerBtn:hover,
+.timePill:hover {
+transform: translateY(-1px);
+}
+
+.statusBar {
+margin-bottom: 18px;
+padding: 14px 16px;
+background: var(--panel);
+border: 1px solid var(--border);
+border-radius: 16px;
+color: var(--muted);
+}
+
+.emptyHero {
+padding-top: 40px;
+}
+
+.emptyBox,
+.panel {
+background: var(--panel);
+border: 1px solid var(--border);
+border-radius: 24px;
+box-shadow: var(--shadow);
+}
+
+.emptyBox {
+padding: 28px;
+}
+
+.panel {
+padding: 16px;
+}
+
+.panelHeader {
+display: flex;
+justify-content: space-between;
+gap: 10px;
+align-items: center;
+margin-bottom: 14px;
+}
+
+.sessionHeader {
+align-items: flex-start;
+}
+
+.sessionMeta {
+text-align: right;
+max-width: 58%;
+word-break: break-word;
+}
+
+.muted {
+color: var(--muted);
+font-size: 14px;
+}
+
+.videoShell {
+position: relative;
+border-radius: 18px;
+overflow: hidden;
+background: #000;
+}
+
+.sessionVideo {
+width: 100%;
+border-radius: 18px;
+background: #000;
+display: block;
+}
+
+.videoOverlayButton {
+position: absolute;
+left: 12px;
+bottom: 12px;
+background: rgba(11, 13, 18, 0.82);
+color: var(--text);
+border: 1px solid rgba(255, 255, 255, 0.12);
+border-radius: 999px;
+padding: 10px 14px;
+z-index: 3;
+backdrop-filter: blur(10px);
+}
+
+.playheadRow {
+display: grid;
+gap: 12px;
+margin-top: 14px;
+}
+
+.playheadNow {
+color: var(--accent);
+font-weight: 700;
+font-size: 18px;
+}
+
+.transportRow {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+}
+
+.transportBtn {
+min-height: 58px;
+}
+
+.axisTimeline {
+position: relative;
+height: 32px;
+margin-top: 6px;
+border-radius: 999px;
+cursor: pointer;
+}
+
+.axisTimelineTrack {
+position: absolute;
+inset: 6px 0;
+border-radius: 999px;
+background: rgba(183, 255, 60, 0.18);
+border: 1px solid rgba(183, 255, 60, 0.12);
+}
+
+.axisTimelineProgress {
+position: absolute;
+left: 0;
+top: 6px;
+bottom: 6px;
+border-radius: 999px;
+background: rgba(183, 255, 60, 0.24);
+}
+
+.axisTimelineMarker {
+position: absolute;
+top: 3px;
+width: 16px;
+height: 26px;
+transform: translateX(-50%);
+border-radius: 999px;
+background: var(--accent);
+border: 0;
+z-index: 2;
+}
+
+.axisTimelinePlayhead {
+position: absolute;
+top: 1px;
+width: 20px;
+height: 30px;
+transform: translateX(-50%);
+border-radius: 999px;
+background: var(--accent);
+box-shadow: 0 0 0 3px rgba(183, 255, 60, 0.12);
+z-index: 3;
+}
+
+.markerGrid {
+display: grid;
+gap: 10px;
+}
+
+.markerGridEight {
+grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.summaryGrid {
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 10px;
+}
+
+.statCard {
+background: var(--panel-2);
+border: 1px solid var(--border);
+border-radius: 18px;
+padding: 14px;
+}
+
+.statLabel {
+font-size: 13px;
+color: var(--muted);
+margin-bottom: 8px;
+}
+
+.statValue {
+font-size: 26px;
+font-weight: 700;
+color: var(--text);
+}
+
+.insightList {
+display: grid;
+gap: 8px;
+margin-top: 12px;
+}
+
+.insightItem {
+background: var(--panel-2);
+border: 1px solid var(--border);
+border-radius: 14px;
+padding: 10px 12px;
+color: var(--muted);
+}
+
+.stack {
+display: grid;
+gap: 10px;
+}
+
+.sequenceCard {
+background: var(--panel-2);
+border: 1px solid var(--border);
+border-radius: 18px;
+padding: 12px;
+}
+
+.sequenceHeader {
+display: grid;
+gap: 10px;
+margin-bottom: 10px;
+}
+
+.sequenceTime {
+color: var(--accent);
+font-weight: 700;
+font-size: 18px;
+}
+
+.sequenceLabel {
+font-size: 15px;
+color: var(--muted);
+margin-bottom: 10px;
+}
+
+.sequenceFlow {
+font-size: 16px;
+color: var(--text);
+line-height: 1.5;
+margin-bottom: 10px;
+}
+
+.sequenceActions {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+}
+
+.exportBtn,
+.jumpBtn {
+min-height: 52px;
+border-radius: 14px;
+border: 1px solid var(--border);
+}
+
+.exportBtn {
+background: var(--accent);
+color: #0b0d12;
+font-weight: 700;
+}
+
+.jumpBtn {
+background: var(--panel);
+color: var(--text);
+}
+
+.markerLogStack {
+display: grid;
+gap: 12px;
+}
+
+.markerLogCard {
+background: var(--panel-2);
+border: 1px solid var(--border);
+border-radius: 18px;
+padding: 12px;
+display: grid;
+gap: 10px;
+}
+
+.markerLogTop {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 10px;
+}
+
+.compactTime {
+min-width: 96px;
+justify-self: start;
+}
+
+.compactDelete {
+padding: 10px 14px;
+min-width: 110px;
+}
+
+.markerLabel {
+font-size: 18px;
+font-weight: 700;
+}
+
+.noteInput {
+width: 100%;
+background: #0e1320;
+border: 1px solid var(--border);
+border-radius: 10px;
+padding: 10px 12px;
+color: var(--text);
+}
+
+.emptyState {
+min-height: 90px;
+display: grid;
+place-items: center;
+color: var(--muted);
+border: 1px dashed var(--border);
+border-radius: 16px;
+}
+
+@media (max-width: 640px) {
+.pageShell {
+padding: 16px 12px 36px;
+}
+
+h1 {
+font-size: 32px;
+}
+
+.sessionHeader {
+display: grid;
+grid-template-columns: 1fr;
+gap: 6px;
+}
+
+.sessionMeta {
+max-width: none;
+text-align: left;
+font-size: 13px;
+line-height: 1.3;
+}
+
+.markerBtn {
+min-height: 68px;
+font-size: 16px;
+padding: 8px 6px;
+}
+
+.summaryGrid {
+grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 }
